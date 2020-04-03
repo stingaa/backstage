@@ -59,6 +59,7 @@ export interface AuditFailed extends AuditBase {
 export interface AuditCompleted extends AuditBase {
   status: 'COMPLETED';
   timeCompleted: string;
+  report: Object;
   categories: Record<LighthouseCategoryId, LighthouseCategoryAbbr>;
 }
 

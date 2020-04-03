@@ -15,14 +15,35 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { MemoryRouter } from 'react-router';
 import mockFetch from 'jest-fetch-mock';
+import { render } from '@testing-library/react';
+import { ThemeProvider } from '@material-ui/core';
+import { BackstageTheme, ApiRegistry, ApiProvider } from '@backstage/core';
+
+import { lighthouseApiRef, LighthouseRestApi } from '../../api';
 import AuditListTable from './AuditListTable';
 
 describe('AuditListTable', () => {
+  let apis: ApiRegistry;
+
+  beforeEach(() => {
+    apis = ApiRegistry.from([
+      [lighthouseApiRef, new LighthouseRestApi('http://lighthouse')],
+    ]);
+  });
+
   it('should render', async () => {
     mockFetch.mockResponse(() => new Promise(() => {}));
-    const rendered = render(<AuditListTable />);
+    const rendered = render(
+      <MemoryRouter>
+        <ApiProvider apis={apis}>
+          <ThemeProvider theme={BackstageTheme}>
+            <AuditListTable />
+          </ThemeProvider>
+        </ApiProvider>
+      </MemoryRouter>,
+    );
     expect(await rendered.findByTestId('progress')).toBeInTheDocument();
   });
 });

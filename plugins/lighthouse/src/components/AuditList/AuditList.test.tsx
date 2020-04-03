@@ -15,19 +15,34 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { MemoryRouter } from 'react-router';
 import mockFetch from 'jest-fetch-mock';
-import AuditList from './AuditList';
+import { render } from '@testing-library/react';
 import { ThemeProvider } from '@material-ui/core';
-import { BackstageTheme } from '@backstage/core';
+import { BackstageTheme, ApiRegistry, ApiProvider } from '@backstage/core';
 
-describe('ExampleComponent', () => {
+import { lighthouseApiRef, LighthouseRestApi } from '../../api';
+import AuditList from './AuditList';
+
+describe('AuditList', () => {
+  let apis: ApiRegistry;
+
+  beforeEach(() => {
+    apis = ApiRegistry.from([
+      [lighthouseApiRef, new LighthouseRestApi('http://lighthouse')],
+    ]);
+  });
+
   it('should render', () => {
     mockFetch.mockResponse(() => new Promise(() => {}));
     const rendered = render(
-      <ThemeProvider theme={BackstageTheme}>
-        <AuditList />
-      </ThemeProvider>,
+      <MemoryRouter>
+        <ApiProvider apis={apis}>
+          <ThemeProvider theme={BackstageTheme}>
+            <AuditList />
+          </ThemeProvider>
+        </ApiProvider>
+      </MemoryRouter>,
     );
     expect(rendered.getByText('Audits')).toBeInTheDocument();
   });
